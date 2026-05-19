@@ -1,6 +1,6 @@
-package com.learning.supplier_service.gateway;
+package com.learning.supplier_service.gateway.mysql.supplier.repository;
 
-import com.learning.supplier_service.gateway.entity.SupplierProductEntity;
+import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierProductEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

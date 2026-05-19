@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
-public record CreateSupplierRequest(
+public record SupplierWebRequest(
         @NotBlank(message = "Legal name is required")
         @Size(max = 255, message = "Legal name must be at most 255 characters")
         String legalName,

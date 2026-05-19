@@ -1,4 +1,4 @@
-package com.learning.supplier_service.gateway.entity;
+package com.learning.supplier_service.gateway.mysql.supplier.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

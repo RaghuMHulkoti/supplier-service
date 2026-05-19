@@ -1,7 +1,7 @@
 package com.learning.supplier_service.web.response;
 
 import com.learning.supplier_service.core.domain.OfferCondition;
-import com.learning.supplier_service.gateway.entity.SupplierProductEntity;
+import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierProductEntity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

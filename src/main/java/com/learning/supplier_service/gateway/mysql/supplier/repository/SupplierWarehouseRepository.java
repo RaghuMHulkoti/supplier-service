@@ -1,6 +1,6 @@
-package com.learning.supplier_service.gateway;
+package com.learning.supplier_service.gateway.mysql.supplier.repository;
 
-import com.learning.supplier_service.gateway.entity.SupplierWarehouseEntity;
+import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierWarehouseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

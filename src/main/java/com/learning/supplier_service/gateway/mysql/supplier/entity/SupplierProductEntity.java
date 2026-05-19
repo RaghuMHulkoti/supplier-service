@@ -1,4 +1,4 @@
-package com.learning.supplier_service.gateway.entity;
+package com.learning.supplier_service.gateway.mysql.supplier.entity;
 
 import com.learning.supplier_service.core.domain.OfferCondition;
 import jakarta.persistence.Column;

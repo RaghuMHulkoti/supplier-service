@@ -1,22 +1,28 @@
 package com.learning.supplier_service.core.service.warehouse;
 
+import com.learning.supplier_service.core.service.Service;
 import com.learning.supplier_service.exception.DuplicateWarehouseCodeException;
-import com.learning.supplier_service.gateway.SupplierWarehouseRepository;
-import com.learning.supplier_service.gateway.entity.SupplierEntity;
-import com.learning.supplier_service.gateway.entity.SupplierWarehouseEntity;
-import org.springframework.stereotype.Service;
+import com.learning.supplier_service.gateway.mysql.supplier.repository.SupplierWarehouseRepository;
+import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierEntity;
+import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierWarehouseEntity;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-@Service
-public class WarehouseService {
+@Component
+public class WarehouseService implements Service<WarehouseServiceRequest, WarehouseServiceResponse> {
     private final SupplierWarehouseRepository warehouseRepository;
 
     public WarehouseService(SupplierWarehouseRepository warehouseRepository) {
         this.warehouseRepository = warehouseRepository;
+    }
+
+    @Override
+    public WarehouseServiceResponse execute(WarehouseServiceRequest request) {
+        return null;
     }
 
     public SupplierWarehouseEntity create(

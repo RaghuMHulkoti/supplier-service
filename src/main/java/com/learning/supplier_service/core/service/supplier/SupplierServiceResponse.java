@@ -15,4 +15,5 @@ import java.util.UUID;
 public class SupplierServiceResponse implements ServiceResponse {
 
     private UUID id;
+    private boolean success;
 }
