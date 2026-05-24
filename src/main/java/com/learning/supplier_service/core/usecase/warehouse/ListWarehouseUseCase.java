@@ -1,20 +1,21 @@
 package com.learning.supplier_service.core.usecase.warehouse;
 
-import com.learning.supplier_service.core.service.warehouse.WarehouseService;
 import com.learning.supplier_service.core.usecase.Usecase;
+import com.learning.supplier_service.gateway.WarehouseGateway;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ListWarehouseUseCase implements Usecase<ListWarehouseUsecaseRequest, ListWarehouseUsecaseResponse> {
-	private final WarehouseService warehouseService;
+	private final WarehouseGateway warehouseGateway;
 
-	public ListWarehouseUseCase(WarehouseService warehouseService) {
-		this.warehouseService = warehouseService;
+	public ListWarehouseUseCase(WarehouseGateway warehouseGateway) {
+		this.warehouseGateway = warehouseGateway;
 	}
 
 	@Override
 	public ListWarehouseUsecaseResponse execute(ListWarehouseUsecaseRequest request) {
-		return new ListWarehouseUsecaseResponse(warehouseService.list(request.supplierId()));
+		return new ListWarehouseUsecaseResponse(
+				warehouseGateway.findAllWarehousesBySupplierIdOrderByCreatedAtAsc(request.supplierId())
+		);
 	}
 }
-

@@ -27,4 +27,3 @@ springdoc:
     displayOperationId: true
   show-actuator: false
   use-fqn: true
-

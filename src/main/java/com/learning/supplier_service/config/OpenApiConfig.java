@@ -9,28 +9,15 @@ import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * OpenAPI/Swagger Configuration for Supplier Service.
- * Provides comprehensive API documentation and enables Swagger UI.
- */
+
 @Configuration
 public class OpenApiConfig {
 
-    /**
-     * Provides a JsonMapper bean for JSON serialization/deserialization.
-     *
-     * @return configured JsonMapper instance
-     */
     @Bean
     public JsonMapper jsonMapper() {
         return new JsonMapper();
     }
 
-    /**
-     * Configures the OpenAPI schema for the Supplier Service.
-     *
-     * @return configured OpenAPI instance
-     */
     @Bean
     public OpenAPI supplierServiceOpenAPI() {
         return new OpenAPI()

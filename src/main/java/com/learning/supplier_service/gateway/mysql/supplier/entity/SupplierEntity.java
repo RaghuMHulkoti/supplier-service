@@ -102,6 +102,18 @@ public class SupplierEntity {
         onboardingStatus = OnboardingStatus.KYC_SUBMITTED;
     }
 
+    public void update(String legalName, String displayName, String phone, String taxId, BigDecimal commissionPct) {
+        if (legalName != null) this.legalName = legalName;
+        if (displayName != null) this.displayName = displayName;
+        if (phone != null) this.phone = phone;
+        if (taxId != null) this.taxId = taxId;
+        if (commissionPct != null) this.commissionPct = commissionPct;
+    }
+
+    public void updateStatus(OnboardingStatus newStatus) {
+        this.onboardingStatus = newStatus;
+    }
+
     public UUID getId() {
         return id;
     }

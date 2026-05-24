@@ -1,6 +1,8 @@
 package com.learning.supplier_service.exception;
 
 import com.learning.supplier_service.web.response.ErrorResponse;
+import com.learning.supplier_service.exception.WarehouseNotFoundException;
+import com.learning.supplier_service.exception.KycNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -37,7 +39,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler({SupplierNotFoundException.class, OfferNotFoundException.class})
+    @ExceptionHandler({SupplierNotFoundException.class, OfferNotFoundException.class,
+            WarehouseNotFoundException.class, KycNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleNotFound(RuntimeException ex) {
         return buildResponse("RESOURCE_NOT_FOUND", ex.getMessage(), HttpStatus.NOT_FOUND, null);
     }
