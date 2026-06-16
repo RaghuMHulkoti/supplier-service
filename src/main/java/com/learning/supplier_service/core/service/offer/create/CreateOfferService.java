@@ -2,10 +2,14 @@ package com.learning.supplier_service.core.service.offer.create;
 
 import com.learning.supplier_service.core.service.Service;
 import com.learning.supplier_service.exception.DuplicateOfferException;
+import com.learning.supplier_service.exception.OfferNotFoundException;
 import com.learning.supplier_service.gateway.SupplierProductGateway;
 import com.learning.supplier_service.gateway.mysql.supplierproduct.entity.SupplierProductEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Locale;
+import java.util.List;
 import java.util.UUID;
 
 @org.springframework.stereotype.Component
@@ -40,25 +44,25 @@ public class CreateOfferService implements Service<CreateOfferServiceRequest, Cr
         return CreateOfferServiceResponse.builder().offer(saved).build();
     }
 
-//    public SupplierProductEntity getRequired(UUID offerId) {
-//        return supplierProductGateway.findById(offerId)
-//                .orElseThrow(() -> new OfferNotFoundException(offerId));
-//    }
-//
-//    public SupplierProductEntity getRequired(UUID supplierId, UUID offerId) {
-//        return supplierProductGateway.findByIdAndSupplierId(offerId, supplierId)
-//                .orElseThrow(() -> new OfferNotFoundException(offerId));
-//    }
-//
-//    public SupplierProductEntity save(SupplierProductEntity offer) {
-//        return supplierProductGateway.save(offer);
-//    }
-//
-//    public Page<SupplierProductEntity> list(UUID supplierId, Pageable pageable) {
-//        return supplierProductGateway.findAllBySupplierId(supplierId, pageable);
-//    }
-//
-//    public List<SupplierProductEntity> listActiveByProduct(UUID productId) {
-//        return supplierProductGateway.findAllByProductIdAndActiveTrueOrderByPriceAsc(productId);
-//    }
+    public SupplierProductEntity getRequired(UUID offerId) {
+        return supplierProductGateway.findById(offerId)
+                .orElseThrow(() -> new OfferNotFoundException(offerId));
+    }
+
+    public SupplierProductEntity getRequired(UUID supplierId, UUID offerId) {
+        return supplierProductGateway.findByIdAndSupplierId(offerId, supplierId)
+                .orElseThrow(() -> new OfferNotFoundException(offerId));
+    }
+
+    public SupplierProductEntity save(SupplierProductEntity offer) {
+        return supplierProductGateway.save(offer);
+    }
+
+    public Page<SupplierProductEntity> list(UUID supplierId, Pageable pageable) {
+        return supplierProductGateway.findAllBySupplierId(supplierId, pageable);
+    }
+
+    public List<SupplierProductEntity> listActiveByProduct(UUID productId) {
+        return supplierProductGateway.findAllByProductIdAndActiveTrueOrderByPriceAsc(productId);
+    }
 }

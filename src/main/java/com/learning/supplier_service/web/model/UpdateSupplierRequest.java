@@ -1,5 +1,6 @@
 package com.learning.supplier_service.web.model;
 
+import com.learning.supplier_service.core.domain.OnboardingStatus;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
@@ -20,10 +21,12 @@ public record UpdateSupplierRequest(
         String taxId,
 
         @DecimalMin(value = "0.00", inclusive = true, message = "Commission percentage cannot be negative")
-        BigDecimal commissionPct
+        BigDecimal commissionPct,
+
+        OnboardingStatus status
 ) {
-    @AssertTrue(message = "At least one supplier field must be provided")
+    @AssertTrue(message = "At least one supplier field or status must be provided")
     public boolean hasAtLeastOneField() {
-        return legalName != null || displayName != null || phone != null || taxId != null || commissionPct != null;
+        return legalName != null || displayName != null || phone != null || taxId != null || commissionPct != null || status != null;
     }
 }

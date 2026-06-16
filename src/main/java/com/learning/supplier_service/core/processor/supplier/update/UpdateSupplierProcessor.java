@@ -5,6 +5,11 @@ import com.learning.supplier_service.core.usecase.supplier.update.UpdateSupplier
 import com.learning.supplier_service.core.usecase.supplier.update.UpdateSupplierUsecaseRequest;
 import org.springframework.stereotype.Component;
 
+/**
+ * Unified processor supporting supplier PATCH updates.
+ * All supplied fields are forwarded so the service can update only the values present
+ * in the request, including status when it is provided.
+ */
 @Component
 public class UpdateSupplierProcessor implements Processor<UpdateSupplierProcessorRequest, UpdateSupplierProcessorResponse> {
 
@@ -16,14 +21,16 @@ public class UpdateSupplierProcessor implements Processor<UpdateSupplierProcesso
 
     @Override
     public UpdateSupplierProcessorResponse process(UpdateSupplierProcessorRequest request) {
-        var response = updateSupplierUseCase.execute(new UpdateSupplierUsecaseRequest(
-                request.getSupplierId(),
-                request.getLegalName(),
-                request.getDisplayName(),
-                request.getPhone(),
-                request.getTaxId(),
-                request.getCommissionPct()
-        ));
-        return new UpdateSupplierProcessorResponse(response.supplier());
+        var usecaseRequest = UpdateSupplierUsecaseRequest.builder()
+                .supplierId(request.getSupplierId())
+                .legalName(request.getLegalName())
+                .displayName(request.getDisplayName())
+                .phone(request.getPhone())
+                .taxId(request.getTaxId())
+                .commissionPct(request.getCommissionPct())
+                .newStatus(request.getNewStatus())
+                .build();
+        var usecaseResponse = updateSupplierUseCase.execute(usecaseRequest);
+        return UpdateSupplierProcessorResponse.ofUpdate(usecaseResponse.supplier());
     }
 }

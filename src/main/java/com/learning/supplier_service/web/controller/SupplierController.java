@@ -10,16 +10,12 @@ import com.learning.supplier_service.core.processor.offer.update.UpdateOfferProc
 import com.learning.supplier_service.core.processor.offer.update.UpdateOfferProcessorRequest;
 import com.learning.supplier_service.core.processor.supplier.create.CreateSupplierProcessor;
 import com.learning.supplier_service.core.processor.supplier.create.CreateSupplierProcessorRequest;
-import com.learning.supplier_service.core.processor.supplier.get.GetSupplierProcessor;
+import com.learning.supplier_service.core.processor.supplier.get.FetchSupplierProcessor;
 import com.learning.supplier_service.core.processor.supplier.get.GetSupplierProcessorRequest;
 import com.learning.supplier_service.core.processor.supplier.kyc.get.GetKycProcessor;
 import com.learning.supplier_service.core.processor.supplier.kyc.get.GetKycProcessorRequest;
 import com.learning.supplier_service.core.processor.supplier.kyc.submit.SubmitKycProcessor;
 import com.learning.supplier_service.core.processor.supplier.kyc.submit.SubmitKycProcessorRequest;
-import com.learning.supplier_service.core.processor.supplier.list.ListSuppliersProcessor;
-import com.learning.supplier_service.core.processor.supplier.list.ListSuppliersProcessorRequest;
-import com.learning.supplier_service.core.processor.supplier.status.UpdateSupplierStatusProcessor;
-import com.learning.supplier_service.core.processor.supplier.status.UpdateSupplierStatusProcessorRequest;
 import com.learning.supplier_service.core.processor.supplier.update.UpdateSupplierProcessor;
 import com.learning.supplier_service.core.processor.supplier.update.UpdateSupplierProcessorRequest;
 import com.learning.supplier_service.core.processor.warehouse.create.CreateWareHouseProcessor;
@@ -39,7 +35,6 @@ import com.learning.supplier_service.web.model.SupplierWebRequest;
 import com.learning.supplier_service.web.model.ToggleWarehouseStatusRequest;
 import com.learning.supplier_service.web.model.UpdateOfferRequest;
 import com.learning.supplier_service.web.model.UpdateSupplierRequest;
-import com.learning.supplier_service.web.model.UpdateSupplierStatusRequest;
 import com.learning.supplier_service.web.model.UpdateWarehouseRequest;
 import com.learning.supplier_service.web.response.KycDetailResponse;
 import com.learning.supplier_service.web.response.OfferResponse;
@@ -76,10 +71,8 @@ public class SupplierController {
     private static final BigDecimal DEFAULT_COMMISSION_PCT = new BigDecimal("10.00");
 
     private final CreateSupplierProcessor createSupplierProcessor;
-    private final GetSupplierProcessor getSupplierProcessor;
-    private final ListSuppliersProcessor listSuppliersProcessor;
+    private final FetchSupplierProcessor fetchSupplierProcessor;
     private final UpdateSupplierProcessor updateSupplierProcessor;
-    private final UpdateSupplierStatusProcessor updateSupplierStatusProcessor;
     private final SubmitKycProcessor submitKycProcessor;
     private final GetKycProcessor getKycProcessor;
     private final CreateWareHouseProcessor createWareHouseProcessor;
@@ -94,10 +87,8 @@ public class SupplierController {
 
     public SupplierController(
             CreateSupplierProcessor createSupplierProcessor,
-            GetSupplierProcessor getSupplierProcessor,
-            ListSuppliersProcessor listSuppliersProcessor,
+            FetchSupplierProcessor fetchSupplierProcessor,
             UpdateSupplierProcessor updateSupplierProcessor,
-            UpdateSupplierStatusProcessor updateSupplierStatusProcessor,
             SubmitKycProcessor submitKycProcessor,
             GetKycProcessor getKycProcessor,
             CreateWareHouseProcessor createWareHouseProcessor,
@@ -111,10 +102,8 @@ public class SupplierController {
             ListOffersProcessor listOffersProcessor
     ) {
         this.createSupplierProcessor = createSupplierProcessor;
-        this.getSupplierProcessor = getSupplierProcessor;
-        this.listSuppliersProcessor = listSuppliersProcessor;
+        this.fetchSupplierProcessor = fetchSupplierProcessor;
         this.updateSupplierProcessor = updateSupplierProcessor;
-        this.updateSupplierStatusProcessor = updateSupplierStatusProcessor;
         this.submitKycProcessor = submitKycProcessor;
         this.getKycProcessor = getKycProcessor;
         this.createWareHouseProcessor = createWareHouseProcessor;
@@ -128,7 +117,6 @@ public class SupplierController {
         this.listOffersProcessor = listOffersProcessor;
     }
 
-    // =================== SUPPLIER ===================
 
     @PostMapping
     public ResponseEntity<Object> createSupplier(@Valid @RequestBody SupplierWebRequest request) {
@@ -138,8 +126,12 @@ public class SupplierController {
 
     @GetMapping("/{supplierId}")
     public ResponseEntity<SupplierResponse> getSupplier(@PathVariable UUID supplierId) {
-        var response = getSupplierProcessor.process(new GetSupplierProcessorRequest(supplierId));
-        return ResponseEntity.ok(SupplierResponse.from(response.supplier()));
+        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forSingleSupplier(supplierId));
+        return ResponseEntity.ok(SupplierResponse.from(response.getSupplier()));
+    }
+
+    private static GetSupplierProcessorRequest getSupplierProcessorRequest(UUID supplierId) {
+        return GetSupplierProcessorRequest.forSingleSupplier(supplierId);
     }
 
     @GetMapping
@@ -148,8 +140,8 @@ public class SupplierController {
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
     ) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        var response = listSuppliersProcessor.process(new ListSuppliersProcessorRequest(pageable));
-        return ResponseEntity.ok(PageResponse.from(response.suppliers(), SupplierResponse::from));
+        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forList(pageable));
+        return ResponseEntity.ok(PageResponse.from(response.getSuppliers(), SupplierResponse::from));
     }
 
     @PatchMapping("/{supplierId}")
@@ -159,20 +151,12 @@ public class SupplierController {
     ) {
         var response = updateSupplierProcessor.process(UpdateSupplierProcessorRequest.builder()
                 .supplierId(supplierId).legalName(request.legalName()).displayName(request.displayName())
-                .phone(request.phone()).taxId(request.taxId()).commissionPct(request.commissionPct()).build());
-        return ResponseEntity.ok(SupplierResponse.from(response.supplier()));
+                .phone(request.phone()).taxId(request.taxId()).commissionPct(request.commissionPct())
+                .newStatus(request.status())
+                .build());
+        return ResponseEntity.ok(SupplierResponse.from(response.getSupplier()));
     }
 
-    @PatchMapping("/{supplierId}/status")
-    public ResponseEntity<Object> updateSupplierStatus(
-            @PathVariable UUID supplierId,
-            @Valid @RequestBody UpdateSupplierStatusRequest request
-    ) {
-        var response = updateSupplierStatusProcessor.process(
-                UpdateSupplierStatusProcessorRequest.builder()
-                        .supplierId(supplierId).newStatus(request.status()).build());
-        return ResponseEntity.ok(response);
-    }
 
     // =================== KYC ===================
 
