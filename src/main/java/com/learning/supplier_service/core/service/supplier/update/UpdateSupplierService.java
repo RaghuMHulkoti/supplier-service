@@ -8,16 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/**
- * Unified service for updating supplier information and/or status.
- * Implements PATCH semantics: only updates fields that are provided in the request.
- * 
- * Supported updates:
- * - Supplier fields: legalName, displayName, phone, taxId, commissionPct
- * - Supplier status: newStatus (with automatic event publishing)
- * 
- * All fields are optional. Only non-null fields are updated.
- */
 @Component
 public class UpdateSupplierService implements Service<UpdateSupplierServiceRequest, UpdateSupplierServiceResponse> {
 
@@ -70,9 +60,7 @@ public class UpdateSupplierService implements Service<UpdateSupplierServiceReque
         return new UpdateSupplierServiceResponse(savedSupplier);
     }
 
-    /**
-     * Check if any supplier fields are provided for update
-     */
+
     private boolean hasSupplierFieldsToUpdate(UpdateSupplierServiceRequest request) {
         return request.getLegalName() != null ||
                request.getDisplayName() != null ||
@@ -81,9 +69,6 @@ public class UpdateSupplierService implements Service<UpdateSupplierServiceReque
                request.getCommissionPct() != null;
     }
 
-    /**
-     * Event object for status update
-     */
     private record SupplierStatusUpdatedEvent(UUID supplierId, String status) {}
 }
 

@@ -4,6 +4,7 @@ import com.learning.supplier_service.core.service.supplier.create.CreateSupplier
 import com.learning.supplier_service.core.service.supplier.create.CreateSupplierServiceRequest;
 import com.learning.supplier_service.core.service.supplier.create.CreateSupplierServiceResponse;
 import com.learning.supplier_service.core.usecase.Usecase;
+import com.learning.supplier_service.exception.SupplierException;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -21,7 +22,7 @@ public class CreateSupplierUsecase implements Usecase<CreateSupplierUsecaseReque
         CreateSupplierServiceResponse createSupplierServiceResponse = createSupplierService.execute(buildSupplierServiceRequest(request));
         return Optional.of(createSupplierServiceResponse)
                 .map(response -> buildSupplierUsecaseResponse(response))
-                .orElseThrow(() -> new RuntimeException("Failed to create supplier"));
+                .orElseThrow(() -> new SupplierException("Failed to create supplier"));
 
     }
 

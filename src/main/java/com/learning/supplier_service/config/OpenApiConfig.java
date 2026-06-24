@@ -1,6 +1,5 @@
 package com.learning.supplier_service.config;
 
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.Contact;
@@ -12,11 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-
-    @Bean
-    public JsonMapper jsonMapper() {
-        return new JsonMapper();
-    }
 
     @Bean
     public OpenAPI supplierServiceOpenAPI() {
@@ -42,4 +36,3 @@ public class OpenApiConfig {
                         .description("Production Server"));
     }
 }
-

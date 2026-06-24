@@ -1,5 +1,6 @@
 package com.learning.supplier_service.core.processor.supplier.create;
 
+import com.learning.supplier_service.common.StatusCode;
 import com.learning.supplier_service.core.processor.Processor;
 import com.learning.supplier_service.core.usecase.supplier.create.CreateSupplierUsecase;
 import com.learning.supplier_service.core.usecase.supplier.create.CreateSupplierUsecaseRequest;
@@ -73,8 +74,8 @@ public class CreateSupplierProcessor implements Processor<CreateSupplierProcesso
             CreateSupplierUsecaseResponse response) {
 
         return CreateSupplierProcessorResponse.builder()
-                .success(response.isSuccess())
                 .supplierId(response.getId())
+                .statusCode(StatusCode.SUCCESS)
                 .build();
     }
 }

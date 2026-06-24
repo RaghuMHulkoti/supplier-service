@@ -6,8 +6,12 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record UpdateSupplierRequest(
+
+        UUID supplierId,
+
         @Size(max = 255, message = "Legal name must be at most 255 characters")
         String legalName,
 

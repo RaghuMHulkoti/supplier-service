@@ -1,28 +1,28 @@
 package com.learning.supplier_service.core.service.outbox;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learning.supplier_service.core.service.Service;
 import com.learning.supplier_service.gateway.SupplierOutboxGateway;
 import com.learning.supplier_service.gateway.mysql.outbox.entity.SupplierOutboxEntity;
 import org.springframework.stereotype.Component;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 
 import java.util.UUID;
 
 @Component
 public class OutboxService implements Service<OutboxServiceRequest, OutboxServiceResponse> {
     private final SupplierOutboxGateway supplierOutboxGateway;
-    private final JsonMapper jsonMapper;
+    private final ObjectMapper objectMapper;
 
-    public OutboxService(SupplierOutboxGateway supplierOutboxGateway, JsonMapper jsonMapper) {
+    public OutboxService(SupplierOutboxGateway supplierOutboxGateway, ObjectMapper objectMapper) {
         this.supplierOutboxGateway = supplierOutboxGateway;
-        this.jsonMapper = jsonMapper;
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public OutboxServiceResponse execute(OutboxServiceRequest request) {
         try {
-            var serializedPayload = jsonMapper.writeValueAsString(request.getPayload());
+            var serializedPayload = objectMapper.writeValueAsString(request.getPayload());
             var savedEntity = supplierOutboxGateway.save(new SupplierOutboxEntity(
                     request.getAggregateId(),
                     request.getEventType(),

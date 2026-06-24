@@ -7,8 +7,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record CreateWarehouseRequest(
+
+        UUID supplierId,
+
         @NotBlank(message = "Warehouse name is required")
         @Size(max = 120, message = "Warehouse name must be at most 120 characters")
         String name,

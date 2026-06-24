@@ -3,6 +3,7 @@ package com.learning.supplier_service.core.usecase.supplier;
 import com.learning.supplier_service.core.service.outbox.OutboxService;
 import com.learning.supplier_service.core.service.supplier.create.CreateSupplierService;
 import com.learning.supplier_service.core.usecase.Usecase;
+import com.learning.supplier_service.gateway.SupplierGateway;
 import com.learning.supplier_service.gateway.SupplierKycGateway;
 import com.learning.supplier_service.gateway.mysql.kyc.entity.SupplierKycEntity;
 import org.springframework.stereotype.Component;
@@ -11,16 +12,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class SubmitSupplierKycUseCase implements Usecase<SubmitSupplierKycUsecaseRequest, SubmitSupplierKycUsecaseResponse> {
 
-    private final CreateSupplierService createSupplierService;
+    private final SupplierGateway supplierGateway;
     private final SupplierKycGateway supplierKycGateway;
     private final OutboxService outboxService;
 
     public SubmitSupplierKycUseCase(
-            CreateSupplierService createSupplierService,
+            SupplierGateway supplierGateway,
             SupplierKycGateway supplierKycGateway,
             OutboxService outboxService
     ) {
-        this.createSupplierService = createSupplierService;
+        this.supplierGateway = supplierGateway;
         this.supplierKycGateway = supplierKycGateway;
         this.outboxService = outboxService;
     }
@@ -28,22 +29,22 @@ public class SubmitSupplierKycUseCase implements Usecase<SubmitSupplierKycUsecas
     @Override
     @Transactional
     public SubmitSupplierKycUsecaseResponse execute(SubmitSupplierKycUsecaseRequest request) {
-        var supplier = createSupplierService.getRequired(request.supplierId());
+        var supplier = supplierGateway.getSupplierById(request.supplierId());
 
-        supplier.markKycSubmitted();
-        createSupplierService.save(supplier);
+        supplier.get().markKycSubmitted();
+        supplierGateway.saveSupplier(supplier.get());
 
-        var kyc = new SupplierKycEntity(supplier, request.documentKind(), request.documentUrl());
+        var kyc = new SupplierKycEntity(supplier.get(), request.documentKind(), request.documentUrl());
         var savedKyc = supplierKycGateway.save(kyc);
 
-        outboxService.append(supplier.getId(), "SUPPLIER_KYC_SUBMITTED",
-                new SupplierKycSubmittedEvent(supplier.getId(), savedKyc.getDocumentKind()));
+        outboxService.append(supplier.get().getId(), "SUPPLIER_KYC_SUBMITTED",
+                new SupplierKycSubmittedEvent(supplier.get().getId(), savedKyc.getDocumentKind()));
 
         return new SubmitSupplierKycUsecaseResponse(
-                supplier.getId(),
+                supplier.get().getId(),
                 savedKyc.getDocumentKind(),
                 savedKyc.getDocumentUrl(),
-                supplier.getOnboardingStatus()
+                supplier.get().getOnboardingStatus()
         );
     }
 
