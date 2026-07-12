@@ -70,23 +70,27 @@ public class SupplierController {
 
     @GetMapping("/{supplierId}")
     public ResponseEntity<Response<Object>> getSupplier(@PathVariable UUID supplierId) {
-        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forSingleSupplier(supplierId));
-        return ResponseEntity.ok(SupplierResponse.from(response.getSupplier()));
+        return of(fetchSupplierProcessor.process(GetSupplierProcessorRequest.forSingleSupplier(supplierId)))
+                .map(SupplierMapper::mapSupplierGetResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(()->new SupplierException("Unable to fetch Supplier"));
+//        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forSingleSupplier(supplierId));
+//        return ResponseEntity.ok(SupplierResponse.from(response.getSupplier()));
     }
 
     private static GetSupplierProcessorRequest getSupplierProcessorRequest(UUID supplierId) {
         return GetSupplierProcessorRequest.forSingleSupplier(supplierId);
     }
 
-    @GetMapping
-    public ResponseEntity<PageResponse<SupplierResponse>> listSuppliers(
-            @RequestParam(defaultValue = "0") @Min(0) int page,
-            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
-    ) {
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forList(pageable));
-        return ResponseEntity.ok(PageResponse.from(response.getSuppliers(), SupplierResponse::from));
-    }
+//    @GetMapping
+//    public ResponseEntity<PageResponse<SupplierResponse>> listSuppliers(
+//            @RequestParam(defaultValue = "0") @Min(0) int page,
+//            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size
+//    ) {
+//        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//        var response = fetchSupplierProcessor.process(GetSupplierProcessorRequest.forList(pageable));
+//        return ResponseEntity.ok(PageResponse.from(response.getSuppliers(), SupplierResponse::from));
+//    }
 
     @PatchMapping("/{supplierId}")
     public ResponseEntity<SupplierResponse> updateSupplier(

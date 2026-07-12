@@ -1,5 +1,7 @@
 package com.learning.supplier_service.core.usecase.supplier;
 
+import com.learning.supplier_service.common.StatusCode;
+import com.learning.supplier_service.core.domain.Supplier;
 import com.learning.supplier_service.core.usecase.UsecaseResponse;
 import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierEntity;
 import lombok.Builder;
@@ -14,21 +16,26 @@ import org.springframework.data.domain.Page;
 @Builder
 @Getter
 public class FetchSupplierUsecaseResponse implements UsecaseResponse {
-    private SupplierEntity supplier;
-    private Page<SupplierEntity> suppliers;
+    private Supplier supplier;
+    private Page<Supplier> suppliers;
+    private StatusCode statusCode;
 
     /**
      * Creates a response for a single supplier fetch
      */
-    public static FetchSupplierUsecaseResponse ofSingleSupplier(SupplierEntity supplier) {
-        return FetchSupplierUsecaseResponse.builder().supplier(supplier).build();
+    public static FetchSupplierUsecaseResponse ofSingleSupplier(Supplier supplier) {
+        return FetchSupplierUsecaseResponse.builder().supplier(supplier)
+                .statusCode(StatusCode.SUCCESS)
+                .build();
     }
 
     /**
      * Creates a response for paginated supplier list
      */
-    public static FetchSupplierUsecaseResponse ofList(Page<SupplierEntity> suppliers) {
-        return FetchSupplierUsecaseResponse.builder().suppliers(suppliers).build();
+    public static FetchSupplierUsecaseResponse ofList(Page<Supplier> suppliers) {
+        return FetchSupplierUsecaseResponse.builder().suppliers(suppliers)
+                .statusCode(StatusCode.SUCCESS)
+                .build();
     }
 
     /**

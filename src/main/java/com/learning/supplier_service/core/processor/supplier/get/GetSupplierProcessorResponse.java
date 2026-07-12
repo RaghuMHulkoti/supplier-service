@@ -1,5 +1,7 @@
 package com.learning.supplier_service.core.processor.supplier.get;
 
+import com.learning.supplier_service.common.StatusCode;
+import com.learning.supplier_service.core.domain.Supplier;
 import com.learning.supplier_service.core.processor.ProcessorResponse;
 import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierEntity;
 import lombok.Builder;
@@ -14,21 +16,25 @@ import org.springframework.data.domain.Page;
 @Builder
 @Getter
 public class GetSupplierProcessorResponse implements ProcessorResponse {
-    private SupplierEntity supplier;
-    private Page<SupplierEntity> suppliers;
+    private Supplier supplier;
+    private Page<Supplier> suppliers;
+    private StatusCode statusCode;;
+
 
     /**
      * Creates a response for a single supplier fetch
      */
-    public static GetSupplierProcessorResponse ofSingleSupplier(SupplierEntity supplier) {
-        return GetSupplierProcessorResponse.builder().supplier(supplier).build();
+    public static GetSupplierProcessorResponse ofSingleSupplier(Supplier supplier) {
+        return GetSupplierProcessorResponse.builder().supplier(supplier)
+                .statusCode(StatusCode.SUCCESS).build();
     }
 
     /**
      * Creates a response for paginated supplier list
      */
-    public static GetSupplierProcessorResponse ofList(Page<SupplierEntity> suppliers) {
-        return GetSupplierProcessorResponse.builder().suppliers(suppliers).build();
+    public static GetSupplierProcessorResponse ofList(Page<Supplier> suppliers) {
+        return GetSupplierProcessorResponse.builder().suppliers(suppliers)
+                .statusCode(StatusCode.SUCCESS).build();
     }
 
     /**

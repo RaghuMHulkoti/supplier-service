@@ -1,5 +1,6 @@
 package com.learning.supplier_service.core.service.supplier.fetch;
 
+import com.learning.supplier_service.common.StatusCode;
 import com.learning.supplier_service.core.domain.Supplier;
 import com.learning.supplier_service.core.service.ServiceResponse;
 import com.learning.supplier_service.gateway.mysql.supplier.entity.SupplierEntity;
@@ -15,10 +16,12 @@ public class FetchSupplierServiceResponse implements ServiceResponse {
 
     private Supplier supplier;
     private Page<Supplier> suppliers;
+    private StatusCode statusCode;
 
     public static FetchSupplierServiceResponse ofSingleSupplier(SupplierEntity supplier) {
         return FetchSupplierServiceResponse.builder()
                 .supplier(SupplierDomainMapper.toDomain(supplier))
+                .statusCode(StatusCode.SUCCESS)
                 .build();
     }
 
@@ -27,6 +30,7 @@ public class FetchSupplierServiceResponse implements ServiceResponse {
                 .suppliers(
                         suppliers.map(SupplierDomainMapper::toDomain)
                 )
+                .statusCode(StatusCode.SUCCESS)
                 .build();
     }
 
