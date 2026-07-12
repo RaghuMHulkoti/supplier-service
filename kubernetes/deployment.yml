@@ -1,0 +1,88 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# supplier-service — Deployment
+#
+# MINIKUBE SETUP (run once before applying):
+#   eval $(minikube docker-env)                      # point Docker CLI at minikube's daemon
+#   docker build -t supplier-service:0.0.1-SNAPSHOT .   # build image inside minikube
+#   kubectl apply -f kubernetes/                     # apply all manifests
+#
+# imagePullPolicy: Never — tells k8s to use the locally-loaded image and
+# never attempt to pull from a remote registry.  Required for minikube.
+# ──────────────────────────────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: supplier-service
+  labels:
+    app: supplier-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: supplier-service
+  template:
+    metadata:
+      labels:
+        app: supplier-service
+    spec:
+      containers:
+        - name: supplier-service
+          # Must match the tag you built with: docker build -t supplier-service:0.0.1-SNAPSHOT .
+          image: supplier-service:0.0.1-SNAPSHOT
+          imagePullPolicy: Never        # use the image already inside minikube — never pull
+          ports:
+            - containerPort: 8080
+          env:
+            # ── Database connection ───────────────────────────────────────────
+            # "postgres" resolves to the postgres Service (postgres.yml)
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres:5432/supplier_db"
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "postgres"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "postgres"
+            - name: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+              value: "org.postgresql.Driver"
+
+            # ── JPA / Hibernate ───────────────────────────────────────────────
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "validate"         # Flyway manages the schema; Hibernate only validates
+            - name: SPRING_JPA_DATABASE_PLATFORM
+              value: "org.hibernate.dialect.PostgreSQLDialect"
+
+            # ── Flyway ────────────────────────────────────────────────────────
+            - name: SPRING_FLYWAY_ENABLED
+              value: "true"
+            - name: SPRING_FLYWAY_LOCATIONS
+              value: "classpath:db/migration"
+
+            # ── JVM / Spring profile ──────────────────────────────────────────
+            - name: SPRING_PROFILES_ACTIVE
+              value: "local"
+
+          # ── Resource budgets ─────────────────────────────────────────────────
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1500m"
+
+          # ── Readiness probe — k8s only sends traffic when the app is ready ──
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20   # give Flyway + Spring time to start
+            periodSeconds: 10
+            failureThreshold: 5
+
+          # ── Liveness probe — k8s restarts the pod if it becomes unresponsive ─
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            failureThreshold: 3

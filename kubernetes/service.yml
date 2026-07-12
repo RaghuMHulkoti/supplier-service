@@ -1,0 +1,25 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# supplier-service — Service
+#
+# NodePort exposes the app on a static port on the minikube node so you can
+# reach it from your laptop browser / curl without an Ingress controller.
+#
+# Access the app:
+#   minikube service supplier-service --url   # prints the full URL
+#   # or manually:
+#   curl http://$(minikube ip):30080/actuator/health
+# ──────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: supplier-service
+spec:
+  type: NodePort
+  selector:
+    app: supplier-service           # must match Deployment pod label
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80                      # port on the Service (cluster-internal)
+      targetPort: 8080              # port on the container
+      nodePort: 30080               # port on the minikube node (30000–32767)
