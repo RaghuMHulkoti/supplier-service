@@ -101,6 +101,12 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Spring Boot Actuator — exposes /actuator/health for k8s liveness/readiness probes -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
