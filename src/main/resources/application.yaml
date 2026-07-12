@@ -1,3 +1,29 @@
 spring:
   application:
     name: supplier_service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/supplier_db
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tagsSorter: alpha
+    operationsSorter: alpha
+    tryItOutEnabled: true
+    displayOperationId: true
+  show-actuator: false
+  use-fqn: true

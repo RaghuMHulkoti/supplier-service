@@ -1,0 +1,32 @@
+# Build output — never copy compiled classes or the fat jar into the image.
+# The multi-stage build produces the jar inside Docker itself.
+target/
+
+# Version control internals — not needed in the build context
+.git/
+.gitignore
+.gitattributes
+
+# Kubernetes/deployment configs — not part of the app itself
+kubernetes/
+
+# Configuration overrides — managed via env vars / Secrets at runtime
+config/
+
+# Documentation — not needed at runtime
+*.md
+HELP.md
+
+# IDE and editor artifacts
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Maven wrapper cache (already copied explicitly in Dockerfile)
+# Nothing to exclude here — .mvn/ is needed
