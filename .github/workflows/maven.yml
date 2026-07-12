@@ -174,7 +174,10 @@ jobs:
           VERSION=$(./mvnw help:evaluate -Dexpression=project.version -q -DforceStdout)
           GIT_SHA=$(git rev-parse --short HEAD)
           # Full image path on ghcr.io
-          GHCR_IMAGE="${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}"
+          # Lowercase owner — Docker requires all-lowercase registry paths.
+          # github.repository_owner preserves original casing (e.g. RaghuMHulkoti).
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          GHCR_IMAGE="${{ env.REGISTRY }}/${OWNER}/${{ env.IMAGE_NAME }}"
           echo "version=${VERSION}"       >> "$GITHUB_OUTPUT"
           echo "git_sha=${GIT_SHA}"       >> "$GITHUB_OUTPUT"
           echo "ghcr_image=${GHCR_IMAGE}" >> "$GITHUB_OUTPUT"
