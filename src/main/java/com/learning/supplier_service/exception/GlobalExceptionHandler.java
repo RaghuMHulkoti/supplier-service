@@ -54,6 +54,17 @@ public class GlobalExceptionHandler {
         return buildResponse("RESOURCE_CONFLICT", ex.getMessage(), HttpStatus.CONFLICT, null);
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        log.warn("Resource not found: {}", ex.getMessage());
+        return buildResponse(
+                "RESOURCE_NOT_FOUND",
+                ex.getMessage(),
+                HttpStatus.NOT_FOUND,
+                null
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
         log.error("Unexpected supplier service error", ex);

@@ -1,0 +1,31 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# Ingress Routing — supplier-service
+#
+# Maps public incoming HTTP requests to internal cluster services.
+#
+# SETUP FOR MINIKUBE:
+#   1. Enable NGINX Ingress controller in minikube:
+#      minikube addons enable ingress
+#   2. Add local host mapping to your machine's /etc/hosts:
+#      echo "$(minikube ip) supplier-service.local" | sudo tee -a /etc/hosts
+#   3. Access the app via:
+#      curl http://supplier-service.local/actuator/health
+#      open http://supplier-service.local/swagger-ui.html
+# ──────────────────────────────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: supplier-service-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: supplier-service.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: supplier-service
+                port:
+                  number: 80
