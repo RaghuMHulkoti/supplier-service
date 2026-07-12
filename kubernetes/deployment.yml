@@ -25,14 +25,22 @@ spec:
       labels:
         app: supplier-service
     spec:
+      # Credentials for pulling from private GHCR registry.
+      # Create with:
+      #   kubectl create secret docker-registry ghcr-pull-secret \
+      #     --docker-server=ghcr.io \
+      #     --docker-username=raghumhulkoti \
+      #     --docker-password=<GITHUB_PAT>
+      imagePullSecrets:
+        - name: ghcr-pull-secret
       containers:
         - name: supplier-service
           # IMAGE_TAG is substituted at deploy time — never hardcode a SHA here.
           # Deploy command:
-          #   export IMAGE_TAG=a1af91d
+          #   export IMAGE_TAG=5b80858
           #   envsubst < kubernetes/deployment.yml | kubectl apply -f -
           image: ghcr.io/raghumhulkoti/supplier-service:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent  # use the image already cached in minikube
+          imagePullPolicy: Always       # always pull to get the latest digest for the tag
           ports:
             - containerPort: 8080
           env:
