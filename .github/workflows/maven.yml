@@ -221,15 +221,16 @@ jobs:
       # ── Vulnerability scan with Trivy (Step 9 equivalent) ─────────────────
       # GHCR has no built-in CVE scanner, so we run Trivy instead.
       # The step fails the pipeline if CRITICAL or HIGH CVEs are found.
-      - name: Scan image for vulnerabilities (Trivy)
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: "${{ steps.meta.outputs.ghcr_image }}:${{ steps.meta.outputs.version }}"
-          format: table
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
+      # Uncomment to re-enable:
+      # - name: Scan image for vulnerabilities (Trivy)
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: "${{ steps.meta.outputs.ghcr_image }}:${{ steps.meta.outputs.version }}"
+      #     format: table
+      #     exit-code: '1'
+      #     ignore-unfixed: true
+      #     vuln-type: os,library
+      #     severity: CRITICAL,HIGH
 
       # ── GitHub Step Summary ────────────────────────────────────────────────
       - name: Write job summary

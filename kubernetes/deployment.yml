@@ -27,9 +27,12 @@ spec:
     spec:
       containers:
         - name: supplier-service
-          # Must match the tag you built with: docker build -t supplier-service:0.0.1-SNAPSHOT .
-          image: supplier-service:0.0.1-SNAPSHOT
-          imagePullPolicy: Never        # use the image already inside minikube — never pull
+          # IMAGE_TAG is substituted at deploy time — never hardcode a SHA here.
+          # Deploy command:
+          #   export IMAGE_TAG=a1af91d
+          #   envsubst < kubernetes/deployment.yml | kubectl apply -f -
+          image: ghcr.io/raghumhulkoti/supplier-service:${IMAGE_TAG}
+          imagePullPolicy: IfNotPresent  # use the image already cached in minikube
           ports:
             - containerPort: 8080
           env:
