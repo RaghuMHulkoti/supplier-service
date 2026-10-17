@@ -13,12 +13,15 @@ spring:
       minimum-idle: 0
       connection-timeout: 30000
       idle-timeout: 600000
-
+spring:
   jpa:
     hibernate:
       ddl-auto: validate
     open-in-view: false
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        default_schema: '"Supplier"'
 
   flyway:
     enabled: true
