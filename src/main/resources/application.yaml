@@ -30,3 +30,19 @@ springdoc:
     displayOperationId: true
   show-actuator: false
   use-fqn: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
