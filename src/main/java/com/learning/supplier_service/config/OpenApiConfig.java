@@ -1,13 +1,12 @@
+
 package com.learning.supplier_service.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.Contact;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
@@ -15,24 +14,10 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI supplierServiceOpenAPI() {
         return new OpenAPI()
-                .info(new Info()
-                        .title("Supplier Service API")
-                        .description("Comprehensive API for managing suppliers, their products, offers, and warehouses. " +
-                                "This service provides functionality for supplier onboarding, product management, " +
-                                "offer management, and warehouse operations.")
-                        .version("1.0.0")
-                        .contact(new Contact()
-                                .name("Supplier Service Team")
-                                .email("support@suppliersservice.com")
-                                .url("https://www.supplyservice.com"))
-                        .license(new License()
-                                .name("Apache 2.0")
-                                .url("https://www.apache.org/licenses/LICENSE-2.0.html")))
-                .addServersItem(new Server()
-                        .url("http://localhost:8080")
-                        .description("Local Development Server"))
-                .addServersItem(new Server()
-                        .url("https://api.supplier-service.com")
-                        .description("Production Server"));
+                .servers(List.of(
+                        new Server()
+                                .url("https://supplier-service-tha0.onrender.com")
+                                .description("Render Production Server")
+                ));
     }
 }
