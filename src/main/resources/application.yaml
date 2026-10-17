@@ -8,6 +8,10 @@ spring:
     username: avnadmin
     password: AVNS_yGow9uoMWcZbMVMfRk8
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 30000
 
   jpa:
     hibernate:
