@@ -6,7 +6,7 @@ set -e
 # The text files (tnsnames.ora, sqlnet.ora, ojdbc.properties) can stay in
 # WALLET_SOURCE_DIR (Render secret files, /etc/secrets).
 if [ -n "$WALLET_CWALLET_B64" ]; then
-  WALLET_TARGET="${WALLET_DIR:-/tmp/wallet}"
+  WALLET_TARGET="/tmp/wallet"
   mkdir -p "$WALLET_TARGET"
   for f in tnsnames.ora sqlnet.ora ojdbc.properties; do
     [ -f "${WALLET_SOURCE_DIR:-/etc/secrets}/$f" ] && cp "${WALLET_SOURCE_DIR:-/etc/secrets}/$f" "$WALLET_TARGET/$f"
