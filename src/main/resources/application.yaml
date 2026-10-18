@@ -4,7 +4,7 @@ spring:
     name: supplier_service
 
   datasource:
-    url: jdbc:oracle:thin:@tcps://adb.ap-mumbai-1.oraclecloud.com:1522/g71e114c9178818_ecommerce_tp.adb.oraclecloud.com
+    url: jdbc:oracle:thin:@ecommerce_tp?TNS_ADMIN=${WALLET_DIR:/Users/raghavendra/Downloads/Wallet_ECOMMERCE}
     username: ADMIN
     password: "@2ztrn322hyR"
     driver-class-name: oracle.jdbc.OracleDriver
