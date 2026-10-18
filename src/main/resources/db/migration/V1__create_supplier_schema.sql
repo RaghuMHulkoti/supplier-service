@@ -1,19 +1,19 @@
 CREATE TABLE suppliers (
-    id UUID PRIMARY KEY,
+    id RAW(16) PRIMARY KEY,
 
-    legal_name VARCHAR(255) NOT NULL,
+    legal_name VARCHAR2(255) NOT NULL,
 
-    display_name VARCHAR(160) NOT NULL,
+    display_name VARCHAR2(160) NOT NULL,
 
-    email VARCHAR(255) NOT NULL,
+    email VARCHAR2(255) NOT NULL,
 
-    phone VARCHAR(20),
+    phone VARCHAR2(20),
 
-    tax_id VARCHAR(40),
+    tax_id VARCHAR2(40),
 
-    country VARCHAR(2) NOT NULL,
+    country VARCHAR2(2) NOT NULL,
 
-    onboarding_status VARCHAR(30) NOT NULL DEFAULT 'PENDING'
+    onboarding_status VARCHAR2(30) DEFAULT 'PENDING' NOT NULL
         CHECK (
             onboarding_status IN (
                 'PENDING',
@@ -24,19 +24,19 @@ CREATE TABLE suppliers (
             )
         ),
 
-    rating NUMERIC(3,2) NOT NULL DEFAULT 0.00
+    rating NUMBER(3,2) DEFAULT 0.00 NOT NULL
         CHECK (rating >= 0 AND rating <= 5),
 
-    commission_pct NUMERIC(5,2) NOT NULL DEFAULT 10.00
+    commission_pct NUMBER(5,2) DEFAULT 10.00 NOT NULL
         CHECK (commission_pct >= 0 AND commission_pct <= 100),
 
-    version BIGINT NOT NULL DEFAULT 0,
+    version NUMBER(19) DEFAULT 0 NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    CHECK (POSITION('@' IN email) > 1)
+    CHECK (INSTR(email, '@') > 1)
 );
 
 CREATE UNIQUE INDEX uq_suppliers_email_lower
@@ -48,47 +48,47 @@ CREATE INDEX idx_suppliers_status
 
 
 CREATE TABLE supplier_kyc (
-    supplier_id UUID PRIMARY KEY
+    supplier_id RAW(16) PRIMARY KEY
         REFERENCES suppliers(id) ON DELETE CASCADE,
 
-    document_kind VARCHAR(40) NOT NULL,
+    document_kind VARCHAR2(40) NOT NULL,
 
-    document_url VARCHAR(1000) NOT NULL,
+    document_url VARCHAR2(1000) NOT NULL,
 
-    verified_at TIMESTAMPTZ,
+    verified_at TIMESTAMP WITH TIME ZONE,
 
-    verifier_ref VARCHAR(120),
+    verifier_ref VARCHAR2(120),
 
-    rejection_reason TEXT,
+    rejection_reason VARCHAR2(4000),
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 
 CREATE TABLE supplier_bank_accounts (
-    id UUID PRIMARY KEY,
+    id RAW(16) PRIMARY KEY,
 
-    supplier_id UUID NOT NULL
+    supplier_id RAW(16) NOT NULL
         REFERENCES suppliers(id) ON DELETE CASCADE,
 
-    account_holder VARCHAR(160) NOT NULL,
+    account_holder VARCHAR2(160) NOT NULL,
 
-    account_number_enc BYTEA NOT NULL,
+    account_number_enc RAW(2000) NOT NULL,
 
-    routing_code VARCHAR(40),
+    routing_code VARCHAR2(40),
 
-    bank_name VARCHAR(120),
+    bank_name VARCHAR2(120),
 
-    is_primary BOOLEAN NOT NULL DEFAULT TRUE,
+    is_primary BOOLEAN DEFAULT TRUE NOT NULL,
 
-    verified_at TIMESTAMPTZ,
+    verified_at TIMESTAMP WITH TIME ZONE,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE INDEX idx_supplier_bank_supplier
@@ -97,40 +97,40 @@ CREATE INDEX idx_supplier_bank_supplier
 
 
 CREATE TABLE supplier_warehouses (
-    id UUID PRIMARY KEY,
+    id RAW(16) PRIMARY KEY,
 
-    supplier_id UUID NOT NULL
+    supplier_id RAW(16) NOT NULL
         REFERENCES suppliers(id) ON DELETE CASCADE,
 
-    name VARCHAR(120) NOT NULL,
+    name VARCHAR2(120) NOT NULL,
 
-    code VARCHAR(40) NOT NULL,
+    code VARCHAR2(40) NOT NULL,
 
-    address_line1 VARCHAR(200) NOT NULL,
+    address_line1 VARCHAR2(200) NOT NULL,
 
-    address_line2 VARCHAR(200),
+    address_line2 VARCHAR2(200),
 
-    city VARCHAR(100) NOT NULL,
+    city VARCHAR2(100) NOT NULL,
 
-    state VARCHAR(100) NOT NULL,
+    state VARCHAR2(100) NOT NULL,
 
-    postal_code VARCHAR(20) NOT NULL,
+    postal_code VARCHAR2(20) NOT NULL,
 
-    country VARCHAR(2) NOT NULL,
+    country VARCHAR2(2) NOT NULL,
 
-    geo_lat NUMERIC(9,6)
+    geo_lat NUMBER(9,6)
         CHECK (geo_lat BETWEEN -90 AND 90),
 
-    geo_lng NUMERIC(9,6)
+    geo_lng NUMBER(9,6)
         CHECK (geo_lng BETWEEN -180 AND 180),
 
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
 
-    version BIGINT NOT NULL DEFAULT 0,
+    version NUMBER(19) DEFAULT 0 NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
     CONSTRAINT uq_supplier_warehouse_code
         UNIQUE (supplier_id, code)
@@ -139,21 +139,21 @@ CREATE TABLE supplier_warehouses (
 
 
 CREATE TABLE supplier_listings (
-    id UUID PRIMARY KEY,
+    id RAW(16) PRIMARY KEY,
 
-    supplier_id UUID NOT NULL
-        REFERENCES suppliers(id) ON DELETE RESTRICT,
+    supplier_id RAW(16) NOT NULL
+        REFERENCES suppliers(id),
 
-    product_id UUID NOT NULL,
+    product_id RAW(16) NOT NULL,
 
-    supplier_sku VARCHAR(80) NOT NULL,
+    supplier_sku VARCHAR2(80) NOT NULL,
 
-    price NUMERIC(19,4) NOT NULL
+    price NUMBER(19,4) NOT NULL
         CHECK (price > 0),
 
-    currency VARCHAR(3) NOT NULL DEFAULT 'INR',
+    currency VARCHAR2(3) DEFAULT 'INR' NOT NULL,
 
-    condition VARCHAR(20) NOT NULL DEFAULT 'NEW'
+    condition VARCHAR2(20) DEFAULT 'NEW' NOT NULL
         CHECK (
             condition IN (
                 'NEW',
@@ -163,18 +163,18 @@ CREATE TABLE supplier_listings (
             )
         ),
 
-    handling_days SMALLINT NOT NULL DEFAULT 1
+    handling_days NUMBER(5) DEFAULT 1 NOT NULL
         CHECK (handling_days >= 0),
 
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
 
-    listed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    listed_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    version BIGINT NOT NULL DEFAULT 0,
+    version NUMBER(19) DEFAULT 0 NOT NULL,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 CREATE UNIQUE INDEX uq_supplier_product
@@ -184,23 +184,21 @@ CREATE UNIQUE INDEX uq_supplier_sku
     ON supplier_listings (supplier_id, supplier_sku);
 
 CREATE INDEX idx_supplier_product_product
-    ON supplier_listings (product_id)
-    WHERE is_active = TRUE;
+    ON supplier_listings (product_id, is_active);
 
 CREATE INDEX idx_supplier_product_supplier
     ON supplier_listings (supplier_id);
 
 CREATE INDEX idx_supplier_product_price
-    ON supplier_listings (product_id, price)
-    WHERE is_active = TRUE;
+    ON supplier_listings (product_id, is_active, price);
 
 
 
 CREATE TABLE supplier_payout_schedules (
-    supplier_id UUID PRIMARY KEY
+    supplier_id RAW(16) PRIMARY KEY
         REFERENCES suppliers(id) ON DELETE CASCADE,
 
-    frequency VARCHAR(20) NOT NULL DEFAULT 'WEEKLY'
+    frequency VARCHAR2(20) DEFAULT 'WEEKLY' NOT NULL
         CHECK (
             frequency IN (
                 'DAILY',
@@ -209,25 +207,25 @@ CREATE TABLE supplier_payout_schedules (
             )
         ),
 
-    next_payout_at TIMESTAMPTZ,
+    next_payout_at TIMESTAMP WITH TIME ZONE,
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 
 
 CREATE TABLE supplier_outbox (
-    id BIGSERIAL PRIMARY KEY,
+    id NUMBER(19) GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
 
-    aggregate_id UUID NOT NULL,
+    aggregate_id RAW(16) NOT NULL,
 
-    event_type VARCHAR(60) NOT NULL,
+    event_type VARCHAR2(60) NOT NULL,
 
-    payload TEXT NOT NULL,
+    payload VARCHAR2(32767) NOT NULL,
 
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING'
+    status VARCHAR2(20) DEFAULT 'PENDING' NOT NULL
         CHECK (
             status IN (
                 'PENDING',
@@ -236,11 +234,10 @@ CREATE TABLE supplier_outbox (
             )
         ),
 
-    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
 
-    sent_at TIMESTAMPTZ
+    sent_at TIMESTAMP WITH TIME ZONE
 );
 
 CREATE INDEX idx_supplier_outbox_pending
-    ON supplier_outbox (status, created_at)
-    WHERE status = 'PENDING';
+    ON supplier_outbox (status, created_at);
