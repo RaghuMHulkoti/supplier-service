@@ -594,7 +594,7 @@ connector=3.5mm</textarea></label>
       if (!res.ok) { const err = new Error((json && json.error && json.error.message) || res.statusText || "Request failed"); err.status = res.status; throw err; }
       return json;
     }
-    const pack = (t, extra) => Object.assign({ accessToken: t.accessToken, refreshToken: t.refreshToken, userId: claims(t.accessToken).sub, exp: Date.now() + (t.expiresIn || 900) * 1000 }, extra);
+    const pack = (t, extra) => Object.assign({ accessToken: t.accessToken, refreshToken: t.refreshToken, userId: claims(t.accessToken).sub, roles: claims(t.accessToken).roles || [], exp: Date.now() + (t.expiresIn || 900) * 1000 }, extra);
     return {
       session: read,
       async signIn(email, password) {
@@ -631,7 +631,12 @@ connector=3.5mm</textarea></label>
     loadProducts().then(() => { if (supplierId) { loadWarehouses(); loadOffers(); } });
     drawStockRows();
   }
-  function enter(sess) { gateView(sess); $("userLink").href = sess.base + "/console.html"; boot(); }
+  // Only seller-side accounts may use this portal. This hides the UI; it is not API authorisation.
+  const SELLER_ROLES = ["SUPPLIER", "OPS", "ADMIN"];
+  const allowed = (sess) => (sess.roles || []).some((r) => SELLER_ROLES.indexOf(r) > -1);
+  const NOT_SELLER = "This account is a customer account and cannot open the supplier portal. Ask an administrator for the SUPPLIER role, or sign in with a supplier account.";
+  async function reject() { await Auth.signOut(); leave(NOT_SELLER); }
+  function enter(sess) { if (!allowed(sess)) { reject(); return; } gateView(sess); $("userLink").href = sess.base + "/console.html"; boot(); }
   function leave(msg) { gateView(null); if (msg) $("gMsg").textContent = msg; }
   $("userUrl").value = store.get("sp.userurl", DEFAULTS.user);
   function refreshLinks() { const b = $("userUrl").value.trim().replace(/\/+$/, ""); $("userLink").href = b + "/console.html"; $("gCreate").href = b + "/console.html"; }
@@ -643,7 +648,7 @@ connector=3.5mm</textarea></label>
     catch (e) { $("gMsg").textContent = e.message; } finally { b.disabled = false; }
   });
   $("signOut").addEventListener("click", async () => { await Auth.signOut(); leave("Signed out."); });
-  setInterval(async () => { if (Auth.session() && !(await Auth.fresh())) leave("Your session ended. Sign in again."); }, 60000);
+  setInterval(async () => { if (!Auth.session()) return; const sess = await Auth.fresh(); if (!sess) leave("Your session ended. Sign in again."); else if (!allowed(sess)) reject(); }, 60000);
   Auth.fresh().then((sess) => { if (sess) enter(sess); else leave(); });
 
 })();
