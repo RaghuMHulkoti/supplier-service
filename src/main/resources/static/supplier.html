@@ -62,6 +62,15 @@ a { color: var(--accent); }
 .current { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; padding: 8px 10px; border-radius: 6px; background: var(--accent-soft); }
 .stockrow { display: grid; gap: 8px; grid-template-columns: minmax(0, 2fr) minmax(0, 2fr) minmax(0, 1fr) auto; align-items: end; }
 @media (max-width: 640px) { .stockrow { grid-template-columns: minmax(0, 1fr); } }
+.flow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flow .arrow { color: var(--muted); }
+.flow .node { border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; font-size: 13px; }
+.flow .node.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
+.flow .node.wait { color: var(--muted); }
+fieldset.fs { border: 0; margin: 0; padding: 0; min-width: 0; }
+fieldset.fs:disabled { opacity: 0.45; }
+.lock { margin: 0 0 10px; padding: 8px 10px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 13px; }
+h2 .chip { margin-left: 6px; text-transform: none; letter-spacing: 0; font-weight: 600; }
 .log { background: var(--code-bg); border-radius: 6px; padding: 8px; max-height: 300px; overflow: auto; font-family: var(--mono); font-size: 12px; }
 .log div { padding: 3px 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .log summary { cursor: pointer; }
@@ -85,14 +94,19 @@ a { color: var(--accent); }
       <label>Inventory service <input id="inventoryUrl" autocomplete="off"></label>
       <label>Product service <input id="productUrl" autocomplete="off"></label>
     </div>
-    <p class="note">Everything below acts for the current supplier. Create one in step 1, or load an existing one by id.</p>
+    <p class="note">Warehouses, offers and stock act for the current supplier. Create one in A, or load an existing one by id.</p>
     <div id="current" class="current" style="margin-top:8px"><span class="muted">No supplier selected.</span></div>
   </section>
 
+  <section class="panel" aria-labelledby="h-flow">
+    <h2 id="h-flow">What depends on what</h2>
+    <div class="flow" id="flow" aria-live="polite"></div>
+    <p class="note">A supplier and a product can be created in any order. A warehouse belongs to a supplier. An offer is one supplier's price for one product. Stock is held per offer in a warehouse.</p>
+  </section>
+
   <div class="cols">
-    <div class="stack">
-      <section class="panel" aria-labelledby="h-sup">
-        <h2 id="h-sup">1. Supplier</h2>
+<section class="panel" aria-labelledby="h-sup">
+        <h2 id="h-sup">A. Supplier <span class="chip">independent</span></h2>
         <div class="grid2">
           <label>Legal name <input id="sLegal" value="UI Test Traders Pvt Ltd"></label>
           <label>Display name <input id="sDisplay" value="UI Test Traders"></label>
@@ -109,28 +123,8 @@ a { color: var(--accent); }
           <button id="loadSupplier" type="button" style="align-self:end">Load</button>
         </div>
       </section>
-
-      <section class="panel" aria-labelledby="h-wh">
-        <h2 id="h-wh">2. Warehouse</h2>
-        <div class="grid2">
-          <label>Name <input id="wName" value="Bengaluru Hub"></label>
-          <label>Code <input id="wCode" value="BLR-01"></label>
-          <label>Address <input id="wLine" value="12 Industrial Layout"></label>
-          <label>City <input id="wCity" value="Bengaluru"></label>
-          <label>State <input id="wState" value="KA"></label>
-          <label>Postal code <input id="wZip" value="560058"></label>
-          <label>Country <input id="wCountry" value="IN" maxlength="2"></label>
-        </div>
-        <div class="row" style="margin-top:10px"><button id="createWarehouse" class="primary" type="button" disabled>Create warehouse</button></div>
-        <p class="note">Creates the warehouse for the supplier and registers the same warehouse with inventory, so stock can be held in it.</p>
-        <div id="whMsg" class="msg" role="status"></div>
-        <div id="warehouses" class="list" style="margin-top:10px"></div>
-      </section>
-    </div>
-
-    <div class="stack">
-      <section class="panel" aria-labelledby="h-prod">
-        <h2 id="h-prod">3. Product</h2>
+<section class="panel" aria-labelledby="h-prod">
+        <h2 id="h-prod">B. Product <span class="chip">independent</span></h2>
         <div class="grid2">
           <label>SKU <input id="pSku" value="ACME-HD-001"></label>
           <label>Title <input id="pTitle" value="Acme Wired Headphones"></label>
@@ -145,9 +139,32 @@ connector=3.5mm</textarea></label>
         <div class="row" style="margin-top:10px"><button id="createProduct" class="primary" type="button">Create product</button></div>
         <div id="prodMsg" class="msg" role="status"></div>
       </section>
+  </div>
 
-      <section class="panel" aria-labelledby="h-offer">
-        <h2 id="h-offer">Price this product (offer)</h2>
+  <div class="cols">
+<section class="panel" aria-labelledby="h-wh">
+        <h2 id="h-wh">C. Warehouse <span class="chip">needs A</span></h2>
+        <p class="lock" id="lock-wh" hidden></p>
+        <fieldset class="fs" id="fs-wh">
+        <div class="grid2">
+          <label>Name <input id="wName" value="Bengaluru Hub"></label>
+          <label>Code <input id="wCode" value="BLR-01"></label>
+          <label>Address <input id="wLine" value="12 Industrial Layout"></label>
+          <label>City <input id="wCity" value="Bengaluru"></label>
+          <label>State <input id="wState" value="KA"></label>
+          <label>Postal code <input id="wZip" value="560058"></label>
+          <label>Country <input id="wCountry" value="IN" maxlength="2"></label>
+        </div>
+        <div class="row" style="margin-top:10px"><button id="createWarehouse" class="primary" type="button" disabled>Create warehouse</button></div>
+        <p class="note">Creates the warehouse for the supplier and registers the same warehouse with inventory, so stock can be held in it.</p>
+        <div id="whMsg" class="msg" role="status"></div>
+        <div id="warehouses" class="list" style="margin-top:10px"></div>
+      </fieldset>
+      </section>
+<section class="panel" aria-labelledby="h-offer">
+        <h2 id="h-offer">D. Offer <span class="chip">needs A and B</span></h2>
+        <p class="lock" id="lock-offer" hidden></p>
+        <fieldset class="fs" id="fs-offer">
         <div class="grid2">
           <label>Product <select id="oProduct"></select></label>
           <label>Your SKU <input id="oSku" placeholder="ACME-HD-001-S1"></label>
@@ -159,12 +176,14 @@ connector=3.5mm</textarea></label>
         <div class="row" style="margin-top:10px"><button id="createOffer" class="primary" type="button" disabled>Create offer</button><button id="refreshProducts" type="button">Refresh products</button></div>
         <div id="offerMsg" class="msg" role="status"></div>
         <div id="offers" class="list" style="margin-top:10px"></div>
+      </fieldset>
       </section>
-    </div>
   </div>
 
   <section class="panel" aria-labelledby="h-stock">
-    <h2 id="h-stock">4. Push inventory</h2>
+    <h2 id="h-stock">E. Push inventory <span class="chip">needs C and D</span></h2>
+        <p class="lock" id="lock-stock" hidden></p>
+        <fieldset class="fs" id="fs-stock">
     <div id="stockRows" class="list"></div>
     <div class="row" style="margin-top:10px">
       <button id="addRow" type="button">Add row</button>
@@ -174,7 +193,8 @@ connector=3.5mm</textarea></label>
     <p class="note">Each row sets the quantity on hand for one offer in one warehouse. Pushing the same row again replaces the number.</p>
     <div id="stockMsg" class="msg" role="status"></div>
     <div id="stockResult" class="list" style="margin-top:10px"></div>
-  </section>
+  </fieldset>
+      </section>
 
   <section class="panel" aria-labelledby="h-log">
     <h2 id="h-log">Requests</h2>
@@ -255,6 +275,31 @@ connector=3.5mm</textarea></label>
   const idOf = (x, key) => (typeof x === "string" ? x : x && (x[key] || x.id)) || "";
   const say = (id, text, kind) => { const m = $(id); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); };
 
+  // ----- what depends on what: lock a section until what it needs exists, and say what is missing
+  let supplierName = "";
+  function refresh() {
+    const A = !!supplierId, B = products.length > 0, C = warehouses.length > 0, D = offers.length > 0;
+    const lock = (fsId, missing) => {
+      $("fs-" + fsId).disabled = missing.length > 0;
+      const note = $("lock-" + fsId);
+      note.hidden = missing.length === 0;
+      note.textContent = missing.length ? "Locked. Still needed: " + missing.join(" and ") + "." : "";
+    };
+    lock("wh", A ? [] : ["a supplier (A)"]);
+    lock("offer", [A ? null : "a supplier (A)", B ? null : "a product (B)"].filter(Boolean));
+    lock("stock", [A ? null : "a supplier (A)", C ? null : "a warehouse (C)", D ? null : "an offer (D)"].filter(Boolean));
+    const node = (label, state, ok) => el("span", { class: "node " + (ok ? "ok" : "wait"), text: label + ": " + state });
+    const flow = $("flow"); flow.textContent = "";
+    flow.append(
+      node("A Supplier", A ? (supplierName || "selected") : "not set", A),
+      node("B Product", B ? products.length + " in catalogue" : "none", B),
+      el("span", { class: "arrow", text: "→" }),
+      node("C Warehouse (needs A)", C ? String(warehouses.length) : "none", C),
+      node("D Offer (needs A and B)", D ? String(offers.length) : "none", D),
+      el("span", { class: "arrow", text: "→" }),
+      node("E Stock (needs C and D)", C && D ? "ready" : "waiting", C && D));
+  }
+
   // ----- current supplier
   let supplierId = store.get("sp.supplierId", "");
   let warehouses = [], offers = [], products = [];
@@ -262,8 +307,8 @@ connector=3.5mm</textarea></label>
     const box = $("current"); box.textContent = "";
     if (!supplierId) { box.append(el("span", { class: "muted", text: "No supplier selected." })); }
     else box.append(el("strong", { text: name || "Supplier" }), el("span", { class: "mono", text: supplierId }));
-    ["createWarehouse", "createOffer"].forEach((id) => { $(id).disabled = !supplierId; });
-    $("pushStock").disabled = !supplierId;
+    supplierName = supplierId ? (name || "selected") : "";
+    refresh();
   }
   function use(id, name) { supplierId = id; store.set("sp.supplierId", id); showSupplier(name); loadWarehouses(); loadOffers(); }
 
@@ -291,11 +336,12 @@ connector=3.5mm</textarea></label>
   // ----- warehouses
   async function loadWarehouses() {
     const box = $("warehouses"); box.textContent = "";
-    if (!supplierId) return;
+    if (!supplierId) { warehouses = []; refresh(); return; }
     try { warehouses = rows(await api("supplier", "/api/v1/warehouses/" + supplierId + "/warehouses")); } catch (e) { warehouses = []; box.append(el("span", { class: "muted", text: "Could not list warehouses: " + e.message })); }
     warehouses.forEach((w) => box.append(el("div", { class: "item" }, el("div", {}, el("strong", { text: w.name || w.code }), el("div", { class: "mono muted", text: (w.id || w.warehouseId) })), el("span", { class: "chip", text: w.code || "" }))));
     if (!warehouses.length && !box.childNodes.length) box.append(el("span", { class: "muted", text: "No warehouses yet." }));
     drawStockRows();
+    refresh();
   }
   $("createWarehouse").addEventListener("click", async () => {
     say("whMsg", "Creating warehouse…");
@@ -334,6 +380,7 @@ connector=3.5mm</textarea></label>
     products.forEach((p) => sel.append(el("option", { value: p.id, text: p.title + " (" + p.sku + ")" })));
     if (selectId) sel.value = selectId;
     syncOfferSku();
+    refresh();
   }
   function syncOfferSku() { const p = products.find((x) => x.id === $("oProduct").value); if (p && !$("oSku").dataset.touched) $("oSku").value = p.sku + "-S1"; }
   $("oSku").addEventListener("input", () => { $("oSku").dataset.touched = "1"; });
@@ -357,7 +404,7 @@ connector=3.5mm</textarea></label>
 
   async function loadOffers() {
     const box = $("offers"); box.textContent = "";
-    if (!supplierId) return;
+    if (!supplierId) { offers = []; refresh(); return; }
     try { offers = rows(await api("supplier", "/api/v1/internal/offers/" + supplierId + "/offers")); } catch (e) { offers = []; box.append(el("span", { class: "muted", text: "Could not list offers: " + e.message })); }
     offers.forEach((o) => {
       const p = products.find((x) => x.id === o.productId);
@@ -366,6 +413,7 @@ connector=3.5mm</textarea></label>
     });
     if (!offers.length && !box.childNodes.length) box.append(el("span", { class: "muted", text: "No offers yet." }));
     drawStockRows();
+    refresh();
   }
   $("createOffer").addEventListener("click", async () => {
     say("offerMsg", "Creating offer…");
@@ -418,6 +466,7 @@ connector=3.5mm</textarea></label>
     } catch (e) { say("stockMsg", e.message, "bad"); }
   });
 
+  refresh();
   showSupplier();
   loadCatalogueChoices();
   loadProducts().then(() => { if (supplierId) { loadWarehouses(); loadOffers(); } });
