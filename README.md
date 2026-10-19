@@ -19,7 +19,7 @@ Part of **ShopTrail**, a multi-seller marketplace. Full system reference: [`mark
 - KYC submission and status.
 - Supplier warehouses (with address and geo point), activate or deactivate.
 - Offers: a supplier's price, condition and handling time for a catalogue product.
-- Serves the **ShopTrail Sellers** portal at `/supplier.html` (only `SUPPLIER`, `OPS` and `ADMIN` accounts).
+- Serves the **ShopTrail Sellers** test console at `/supplier.html` (only `SUPPLIER`, `OPS` and `ADMIN` accounts). It exists only to exercise the seller APIs from a browser; a dedicated frontend has not been built yet.
 
 ## How it fits
 
