@@ -229,3 +229,7 @@ None.
 - Endpoints are open; no JWT or role check yet (the portal hides itself from customers only).
 - KYC review, bank accounts and payouts have tables but no flow.
 - Events are not published.
+
+## License
+
+Copyright (c) 2026 Raghavendra. All rights reserved. The code is published for viewing only; copying or reuse requires written permission. See [LICENSE](LICENSE).
