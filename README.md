@@ -2,7 +2,7 @@
 
 The seller side of ShopTrail: suppliers, KYC, supplier warehouses and offers (a supplier's price for a product).
 
-Part of **ShopTrail**, a multi-seller marketplace. Full system reference: [`marketplace_tdd.md`](https://github.com/RaghuMHulkoti/inventory-manager/blob/main/marketplace_tdd.md).
+Part of **ShopTrail**, a multi-seller marketplace. Full system reference: [`marketplace_tdd.md`](https://github.com/RaghuMHulkoti/shoptrail/blob/main/docs/marketplace_tdd.md).
 
 | | |
 |---|---|
@@ -96,7 +96,7 @@ Responses are wrapped as `{"status", "message", "body"}`. The order of setup is:
 
 ## Data model
 
-Schema `SUPPLIER`. Full columns and constraints: [section 8 of the reference](https://github.com/RaghuMHulkoti/inventory-manager/blob/main/marketplace_tdd.md#8-data-model).
+Schema `SUPPLIER`. Full columns and constraints: [section 8 of the reference](https://github.com/RaghuMHulkoti/shoptrail/blob/main/docs/marketplace_tdd.md#8-data-model).
 
 ```mermaid
 erDiagram
