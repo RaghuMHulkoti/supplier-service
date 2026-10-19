@@ -144,9 +144,11 @@ connector=3.5mm</textarea></label>
   <div class="cols">
 <section class="panel" aria-labelledby="h-wh">
         <h2 id="h-wh">C. Warehouse <span class="chip">needs A</span></h2>
+        <div class="grid2" style="margin-bottom:10px"><label>Supplier id <input id="wSupplier" class="mono" placeholder="supplier id (from A)" autocomplete="off"></label></div>
         <p class="lock" id="lock-wh" hidden></p>
         <fieldset class="fs" id="fs-wh">
         <div class="grid2">
+          
           <label>Name <input id="wName" value="Bengaluru Hub"></label>
           <label>Code <input id="wCode" value="BLR-01"></label>
           <label>Address <input id="wLine" value="12 Industrial Layout"></label>
@@ -155,7 +157,7 @@ connector=3.5mm</textarea></label>
           <label>Postal code <input id="wZip" value="560058"></label>
           <label>Country <input id="wCountry" value="IN" maxlength="2"></label>
         </div>
-        <div class="row" style="margin-top:10px"><button id="createWarehouse" class="primary" type="button" disabled>Create warehouse</button></div>
+        <div class="row" style="margin-top:10px"><button id="createWarehouse" class="primary" type="button">Create warehouse</button></div>
         <p class="note">Creates the warehouse for the supplier and registers the same warehouse with inventory, so stock can be held in it.</p>
         <div id="whMsg" class="msg" role="status"></div>
         <div id="warehouses" class="list" style="margin-top:10px"></div>
@@ -163,9 +165,11 @@ connector=3.5mm</textarea></label>
       </section>
 <section class="panel" aria-labelledby="h-offer">
         <h2 id="h-offer">D. Offer <span class="chip">needs A and B</span></h2>
+        <div class="grid2" style="margin-bottom:10px"><label>Supplier id <input id="oSupplier" class="mono" placeholder="supplier id (from A)" autocomplete="off"></label></div>
         <p class="lock" id="lock-offer" hidden></p>
         <fieldset class="fs" id="fs-offer">
         <div class="grid2">
+          
           <label>Product <select id="oProduct"></select></label>
           <label>Your SKU <input id="oSku" placeholder="ACME-HD-001-S1"></label>
           <label>Price <input id="oPrice" type="number" min="0.01" step="0.01" value="1499"></label>
@@ -173,7 +177,7 @@ connector=3.5mm</textarea></label>
           <label>Condition <select id="oCondition"><option>NEW</option><option>REFURBISHED</option><option>USED_LIKE_NEW</option></select></label>
           <label>Handling days <input id="oDays" type="number" min="0" value="2"></label>
         </div>
-        <div class="row" style="margin-top:10px"><button id="createOffer" class="primary" type="button" disabled>Create offer</button><button id="refreshProducts" type="button">Refresh products</button></div>
+        <div class="row" style="margin-top:10px"><button id="createOffer" class="primary" type="button">Create offer</button><button id="refreshProducts" type="button">Refresh products</button></div>
         <div id="offerMsg" class="msg" role="status"></div>
         <div id="offers" class="list" style="margin-top:10px"></div>
       </fieldset>
@@ -182,12 +186,13 @@ connector=3.5mm</textarea></label>
 
   <section class="panel" aria-labelledby="h-stock">
     <h2 id="h-stock">E. Push inventory <span class="chip">needs C and D</span></h2>
+        <div class="grid2" style="margin-bottom:10px"><label>Supplier id <input id="stSupplier" class="mono" placeholder="supplier id (from A)" autocomplete="off"></label></div>
         <p class="lock" id="lock-stock" hidden></p>
         <fieldset class="fs" id="fs-stock">
     <div id="stockRows" class="list"></div>
     <div class="row" style="margin-top:10px">
       <button id="addRow" type="button">Add row</button>
-      <button id="pushStock" class="primary" type="button" disabled>Push stock</button>
+      <button id="pushStock" class="primary" type="button">Push stock</button>
       <button id="refreshLists" type="button">Refresh offers and warehouses</button>
     </div>
     <p class="note">Each row sets the quantity on hand for one offer in one warehouse. Pushing the same row again replaces the number.</p>
@@ -276,6 +281,17 @@ connector=3.5mm</textarea></label>
   const say = (id, text, kind) => { const m = $(id); m.textContent = text; m.className = "msg" + (kind ? " " + kind : ""); };
 
   // ----- what depends on what: lock a section until what it needs exists, and say what is missing
+  const SUPPLIER_FIELDS = ["wSupplier", "oSupplier", "stSupplier"];
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  /** An id typed or pasted into a form becomes the current supplier, so every form acts for the same one. */
+  function adopt(fieldId) {
+    const v = $(fieldId).value.trim();
+    if (!v) { supplierId = ""; store.set("sp.supplierId", ""); warehouses = []; offers = []; showSupplier(); return; }
+    if (!UUID.test(v)) { return; }
+    if (v !== supplierId) use(v); else mirror();
+  }
+  function mirror() { SUPPLIER_FIELDS.forEach((id) => { if ($(id).value.trim() !== supplierId) $(id).value = supplierId; }); }
+  SUPPLIER_FIELDS.forEach((id) => { $(id).addEventListener("change", () => adopt(id)); $(id).addEventListener("input", () => { if (UUID.test($(id).value.trim())) adopt(id); }); });
   let supplierName = "";
   function refresh() {
     const A = !!supplierId, B = products.length > 0, C = warehouses.length > 0, D = offers.length > 0;
@@ -308,6 +324,7 @@ connector=3.5mm</textarea></label>
     if (!supplierId) { box.append(el("span", { class: "muted", text: "No supplier selected." })); }
     else box.append(el("strong", { text: name || "Supplier" }), el("span", { class: "mono", text: supplierId }));
     supplierName = supplierId ? (name || "selected") : "";
+    mirror();
     refresh();
   }
   function use(id, name) { supplierId = id; store.set("sp.supplierId", id); showSupplier(name); loadWarehouses(); loadOffers(); }
@@ -344,6 +361,8 @@ connector=3.5mm</textarea></label>
     refresh();
   }
   $("createWarehouse").addEventListener("click", async () => {
+    if (!UUID.test($("wSupplier").value.trim())) { say("whMsg", "Enter a valid supplier id (a UUID) in this form first.", "bad"); return; }
+    adopt("wSupplier");
     say("whMsg", "Creating warehouse…");
     try {
       const created = body(await api("supplier", "/api/v1/warehouses/" + supplierId + "/warehouses", { method: "POST", body: {
@@ -416,6 +435,8 @@ connector=3.5mm</textarea></label>
     refresh();
   }
   $("createOffer").addEventListener("click", async () => {
+    if (!UUID.test($("oSupplier").value.trim())) { say("offerMsg", "Enter a valid supplier id (a UUID) in this form first.", "bad"); return; }
+    adopt("oSupplier");
     say("offerMsg", "Creating offer…");
     try {
       await api("supplier", "/api/v1/internal/offers/" + supplierId + "/offers", { method: "POST", body: {
@@ -446,6 +467,8 @@ connector=3.5mm</textarea></label>
   $("addRow").addEventListener("click", () => { if (offers.length && warehouses.length) { if ($("stockRows").firstChild && !$("stockRows").firstChild.read) $("stockRows").textContent = ""; $("stockRows").append(stockRow()); } });
   $("refreshLists").addEventListener("click", async () => { await loadProducts(); await loadWarehouses(); await loadOffers(); });
   $("pushStock").addEventListener("click", async () => {
+    if (!UUID.test($("stSupplier").value.trim())) { say("stockMsg", "Enter a valid supplier id (a UUID) in this form first.", "bad"); return; }
+    adopt("stSupplier");
     const items = [...$("stockRows").children].filter((r) => r.read).map((r) => r.read());
     if (!items.length) { say("stockMsg", "Add a row first.", "bad"); return; }
     say("stockMsg", "Pushing stock…");
