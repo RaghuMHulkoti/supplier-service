@@ -13,7 +13,7 @@ Your supplier service now has OpenAPI/Swagger documentation configured and ready
 #### 2. **Configuration Class (OpenApiConfig.java)**
    - Located at: `src/main/java/com/learning/supplier_service/config/OpenApiConfig.java`
    - Provides comprehensive API metadata:
-     - API Title: "Supplier Service API"
+     - API Title: "ShopTrail Supplier Service API"
      - Version: 1.0.0
      - Contact information
      - License information (Apache 2.0)
